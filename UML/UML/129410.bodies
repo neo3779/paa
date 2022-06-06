@@ -1,0 +1,143 @@
+class Simulation
+!!!138242.cpp!!!	Simulation()
+
+	/* TO DO: add relevant code */
+
+
+!!!138370.cpp!!!	~Simulation()
+
+	/* TO DO: add relevant code */
+
+	simCleanUp();
+
+	return;			
+!!!138498.cpp!!!	simMain(in hWnd : HWND, inout msg : MSG) : int
+
+	if ( simInit(hWnd) )
+	{
+		simLoop(hWnd, msg);
+		simCleanUp();
+
+		return 1;
+	}
+
+	return 0;
+!!!138626.cpp!!!	simInit(in hWnd : HWND) : int
+
+	/* TO DO: add relevant code */
+
+	// Initialise:	world data module,
+	//				graphics module,
+	//				dynamics / behaviour module,
+	//				flow control module
+
+
+		 
+
+    if( world.worldDataModuleInit(&graphics) && 
+		graphics.graphicsModuleInit(hWnd) )	
+	{
+		ShowCursor(FALSE);  /* hide mouse cursor */
+		return 1;
+	}
+
+	return 0;
+
+!!!138754.cpp!!!	simCleanUp() : int
+
+	/* TO DO: add relevant code */
+
+	world.worldCleanUp();			// release world objects
+	graphics.graphicsCleanUp();		// release graphics objects
+
+	ShowCursor(TRUE);				// show mouse cursor
+
+	return 1;
+!!!138882.cpp!!!	simLoop(in hWnd : HWND, inout msg : MSG) : int
+
+	/* TO DO: add relevant code */
+
+    timeStep = 0;
+	put = GetTickCount();
+	interFrameInterval = 0;
+	frameStartTime = 0;
+	frameProcessingTime = 0;
+	curTime = 0;
+	
+	/* Main loop  */
+	
+	ZeroMemory( msg, sizeof(*msg) );
+		interFrameInterval = 33;
+	/* retrieve messages (for e.g. user interaction devices) */
+	while( msg->message != WM_QUIT ) 	/* drop out of loop if "quit" message received */
+	{	
+		//time step calc.	
+		timeStep = GetTickCount() - put;
+		timeStep = timeStep /100; 
+		put = GetTickCount();
+
+		frameStartTime = GetTickCount(); //time just before frame process begins 
+		
+		/* Windows-part of loop body */
+		if( PeekMessage( msg, NULL, 0U, 0U, PM_REMOVE ) )
+      	/* Note: PeekMessage() does not wait for message to be placed in queue
+         before returning (whereas GetMessage() does wait) */
+		{
+			TranslateMessage( msg ); 	/* translate keyboard message */
+			DispatchMessage( msg );		/* dispatch message to window procedure (via Windows) */
+		}
+
+		/* Simulation-part of loop body */
+		simProc(hWnd);
+		frameProcessingTime = GetTickCount() - frameStartTime;
+		Sleep(interFrameInterval - frameProcessingTime);
+
+		//delay calc
+ 
+		
+		
+	}
+
+   return 1;
+!!!139010.cpp!!!	simProc(in hWnd : HWND) : int
+
+	/* TO DO: add relevant code */
+
+
+	keyEvent		event;
+
+	/* Read user input (if any), and activate control logic */
+	event = kbd.checkUserInput(hWnd);
+	simControlLogic(hWnd, event);
+
+   return 1;
+!!!139138.cpp!!!	simControlLogic(in hWnd : HWND, in event : keyEvent) : int
+
+	/* TO DO: add relevant code */
+
+	if (event != QUIT)
+	{
+		world.update(event,&graphics,timeStep);					// update parameters of virtual world
+  		simDisplayFrame(hWnd);			// display frame
+	}
+
+   return 1;
+!!!139266.cpp!!!	simDisplayFrame(in hWnd : HWND) : int
+
+	/* TO DO: add relevant code */
+
+
+	/* Use double buffering:
+			(i) first draw into bitmap used as back-buffer
+			(ii) then display back buffer 
+	  */
+	// (i.1) display HUD
+	graphics.drawHUD();			// draw HUD
+
+	// (i.2) display world on HUD
+	world.draw(&graphics);		// update display of virtual world
+
+	// (ii) display back buffer 
+	graphics.displayBackBuffer(hWnd);
+
+	return 1;

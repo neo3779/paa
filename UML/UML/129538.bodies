@@ -1,0 +1,422 @@
+class WorldData
+!!!140418.cpp!!!	WorldData()
+
+
+!!!140546.cpp!!!	~WorldData()
+
+	/* TO DO: add relevant code */
+
+	worldCleanUp();
+
+	return;			
+!!!140674.cpp!!!	worldDataModuleInit(inout pGraphicsModule : GraphicsM) : int
+
+	rnd.randomInit();
+
+	player.GameObjectInit();
+	player.setGameObjectUp(0.0F,0.0F,
+						   100.0F,0.0F,
+						   100.0F,5.0F,
+						   0.0F,5.0F);
+	player.friction()->setFriction(1.0F);
+	player.particle()->setPosition(492.0F,387.0F);
+	player.particle()->setPosition(11.0F,387.0F);
+	player.particle()->setMass(1.0F);
+	player.particle()->setForce(0.1F, 0.0F);
+	player.particle()->setApg(false);
+
+	hill.GameObjectInit();
+	hill.setGameObjectUp(0.0F,0.0F,
+						100.0F,0.0F,
+						300.0F,75.0F,
+						-200.0F,75.0F);
+	hill.friction()->setFriction(1.0F);
+	hill.particle()->setPosition(624,663);
+	hill.slopes();
+
+	cover.GameObjectInit();
+	cover.setGameObjectUp(0.0F,0.0F,
+						0.0F,10.0F,
+						200.0F,10.0F,
+						200.0F,0.0F);
+	cover.friction()->setFriction(1.0F);
+	cover.particle()->setPosition(10,563);
+
+	flys.particleSystemInit();
+	flys.viewAllPart();
+
+	spaceShip.spaceShipInit();
+	spaceShip.particle()->setPosition(11.0F,100.0F);
+	spaceShip.particle()->setForce(0.1F, 0.0F);
+	spaceShip.particle()->setMass(1.0F);
+	spaceShip.particle()->setApg(false);
+
+	for (int i = 0; i < astNums; i++)
+	{
+		asteroids[i].GameObjectInit();
+		asteroids[i].setGameObjectUp(0.0F,0.0F,
+									5.0F,-5.0F,
+									0.0F,-10.0F,
+									-5.0F,-5.0F);
+		asteroids[i].slopes();
+		explosions[i].particleSystemInit();
+		restAsteroid(i);
+
+	}
+
+	for (int i = 0; i < dinoNums; i++)
+	{
+		dinos[i].GameObjectInit();
+		dinos[i].particle()->setMass((float)rnd.getInt(100));
+		dinos[i].particle()->setForce(1.0f,1.0f);
+		dinos[i].particle()->setInitVelocity((float)rnd.getIntBetween(15,50)*-1,(float)rnd.getIntBetween(15,50)*-1);
+		dinos[i].particle()->setPosition(100.0F,100.0F);
+		dinos[i].particle()->setAngle((float)rnd.getIntBetween(20,70)*-1);
+		dinos[i].particle()->projectileMotion();
+		dinos[i].particle()->setPosition(1024.0F,728.0F);
+
+
+
+	}
+
+	return 1;
+!!!140802.cpp!!!	worldCleanUp() : void
+
+/* TO DO: add relevant code */
+
+	return;			
+!!!140930.cpp!!!	update(in kEvent : keyEvent, inout pGraphicsModule : GraphicsM, in timeStep : float) : int
+
+	/* TO DO: add relevant code */
+	// For example:
+	// update world position of square as determined by user input.
+	switch(kEvent)
+		{
+		// Update parameters of virtual world
+		case LEFT:
+			// TO DO: service up-key as approriate
+			if(player.particle()->getVelocity().x > 0 &&
+				player.particle()->getAcceleration().x > 0 &&
+				player.particle()->getForce().x > 0)
+			{
+				player.particle()->setVelocity(player.particle()->getVelocity().x * -1,player.particle()->getVelocity().y);
+				player.particle()->setAcceleration(player.particle()->getAcceleration().x * -1,player.particle()->getAcceleration().y);
+				player.particle()->setForce(player.particle()->getForce().x * -1,player.particle()->getForce().y);
+				player.particle()->setVelocity(0.0F,0.0F);
+			}
+			break;
+		case RIGHT:
+			// TO DO: service down-key as approriate
+
+			if(player.particle()->getVelocity().x < 0 &&
+				player.particle()->getAcceleration().x < 0 &&
+				player.particle()->getForce().x < 0)
+			{
+				player.particle()->setVelocity(player.particle()->getVelocity().x * -1,player.particle()->getVelocity().y);
+				player.particle()->setAcceleration(player.particle()->getAcceleration().x * -1,player.particle()->getAcceleration().y);
+				player.particle()->setForce(player.particle()->getForce().x * -1,player.particle()->getForce().y);
+				player.particle()->setVelocity(0.0F,0.0F);
+			}
+			break;
+		default:
+			// TO DO: service "all-other-keys" as approriate
+
+			break;
+		}
+
+	spaceShip.particle()->move(timeStep);
+	flys.swarmMove(timeStep);
+	player.particle()->move(timeStep);
+
+	Point2D point;
+	
+	point.x = 0;
+	point.y = 0;
+
+	float temp,y,x;
+
+	for (int i = 0; i < astNums; i++)
+	{
+		asteroids[i].particle()->move(timeStep);
+		explosions[i].explosionMove(timeStep, pGraphicsModule);
+
+		if(hill.slop(3) != asteroids[i].particle()->getVelocity().y/asteroids[i].particle()->getVelocity().x)
+		{
+			y = asteroids[i].particle()->getVelocity().y;
+			x = asteroids[i].particle()->getVelocity().x;
+			if (y == 0 || x == 0)
+				temp = 0;
+			else
+				temp = y/x;
+
+			point = lineIntersect(hill.particle()->getPosition(),hill.slop(3),asteroids[i].particle()->getPosition(),temp);
+
+
+			if (asteroids[i].particle()->getPosition().x > point.x &&
+				asteroids[i].particle()->getPosition().y > point.y)
+			{
+				if(asteroids[i].particle()->getPosition().x < hill.particle()->getPosition().x &&
+					asteroids[i].particle()->getPosition().y > pGraphicsModule->viewport.bottom - 40)
+				{
+
+					explosions[i].setPosition(point.x,point.y);
+					explosions[i].setExplod(true);
+					restAsteroid(i);
+				}
+			}
+		}
+
+		if(hill.slop(1) != asteroids[i].particle()->getVelocity().y/asteroids[i].particle()->getVelocity().x)
+		{
+			y = asteroids[i].particle()->getVelocity().y;
+			x = asteroids[i].particle()->getVelocity().x;
+			if (y == 0 || x == 0)
+				temp = 0;
+			else
+				temp = y/x;
+			
+			point.x = hill.particle()->getPosition().x + hill.GameObjectPoint(1).x;
+			point.y = hill.particle()->getPosition().y;
+
+			point = lineIntersect(point,hill.slop(1),asteroids[i].particle()->getPosition(),temp);
+
+			if (asteroids[i].particle()->getPosition().x < point.x  &&
+				asteroids[i].particle()->getPosition().y > point.y)
+			{
+				if(asteroids[i].particle()->getPosition().x > hill.particle()->getPosition().x &&
+					asteroids[i].particle()->getPosition().y > pGraphicsModule->viewport.bottom - 40)
+				{
+
+					explosions[i].setPosition(point.x,point.y);
+					explosions[i].setExplod(true);
+					restAsteroid(i);
+				}
+			}
+		}		
+	}
+	
+	for (int i = 0; i < dinoNums; i++)
+	{
+		dinos[i].particle()->projectileMotion();
+		dinos[i].particle()->move(timeStep);
+	}
+
+	for (int i = 0; i < dinoNums; i++)
+	{
+		if(dinos[i].particle()->getPosition().y > pGraphicsModule->viewport.bottom - 40)
+		{
+			dinos[i].particle()->setVelocity(dinos[i].particle()->getVelocity().x,dinos[i].particle()->getVelocity().y * -1);
+			dinos[i].particle()->setAcceleration(dinos[i].particle()->getAcceleration().x,dinos[i].particle()->getAcceleration().y * -1);
+			dinos[i].particle()->setForce(dinos[i].particle()->getForce().x ,dinos[i].particle()->getForce().y * -1);
+			//dinos[i].particle()->setInitVelocity(dinos[i].particle()->getInitVelocity().x, dinos[i].particle()->getInitVelocity().y * -1);
+		
+			if(dinos[i].particle()->getPosition().x < cover.particle()->getPosition().x + 100)
+			{
+				dinos[i].particle()->setVelocity(0,0);
+				dinos[i].particle()->setAcceleration(0,0);
+				dinos[i].particle()->setForce(0,0);
+			}
+		}
+	}
+	
+	for (int i = 0; i < astNums; i++)
+	{
+		if(asteroids[i].particle()->getPosition().y > pGraphicsModule->viewport.bottom - 40 && 
+			((asteroids[i].particle()->getPosition().x > 10 
+			&&  asteroids[i].particle()->getPosition().x < hill.particle()->getPosition().x + hill.GameObjectPoint(3).x)||
+			((asteroids[i].particle()->getPosition().x < 1034 
+			&&  asteroids[i].particle()->getPosition().x > hill.particle()->getPosition().x + hill.GameObjectPoint(2).x))))
+		{
+			explosions[i].setPosition(asteroids[i].particle()->getPosition().x,(float)pGraphicsModule->viewport.bottom - 40);
+			explosions[i].setExplod(true);
+			restAsteroid(i);
+		}
+		if(asteroids[i].particle()->getPosition().y > hill.particle()->getPosition().y &&
+			asteroids[i].particle()->getPosition().x > hill.particle()->getPosition().x &&
+			asteroids[i].particle()->getPosition().x < hill.particle()->getPosition().x + 100)
+		{
+			explosions[i].setPosition(asteroids[i].particle()->getPosition().x,hill.particle()->getPosition().y);
+			explosions[i].setExplod(true);
+			restAsteroid(i);
+		}
+		if(asteroids[i].particle()->getPosition().y < pGraphicsModule->viewport.bottom *-2 ||
+			asteroids[i].particle()->getPosition().x > pGraphicsModule->viewport.right * 2 ||
+			asteroids[i].particle()->getPosition().x < pGraphicsModule->viewport.right * -2 )
+		{
+			restAsteroid(i);
+		}
+
+		if((asteroids[i].particle()->getPosition().x  + 10 < pGraphicsModule->viewport.left) ||
+    		(asteroids[i].particle()->getPosition().x + 10 > pGraphicsModule->viewport.right))
+		{
+			asteroids[i].particle()->setVelocity(asteroids[i].particle()->getVelocity().x * -1,asteroids[i].particle()->getVelocity().y);
+			asteroids[i].particle()->setAcceleration(asteroids[i].particle()->getAcceleration().x * -1,asteroids[i].particle()->getAcceleration().y);
+			asteroids[i].particle()->setForce(asteroids[i].particle()->getForce().x * -1,asteroids[i].particle()->getForce().y);
+		}		
+		
+		if(asteroids[i].particle()->getPosition().y + 5 > player.particle()->getPosition().y + 10)
+		{
+			if(asteroids[i].particle()->getPosition().x > player.particle()->getPosition().x &&
+				asteroids[i].particle()->getPosition().x < player.particle()->getPosition().x + 100.0F &&
+				asteroids[i].particle()->getVelocity().y > 0)
+			{
+				if(asteroids[i].particle()->getPosition().y >=player.particle()->getPosition().y )
+				{
+					switchYDirAsteroids(i);
+				}
+			}
+
+			if(asteroids[i].particle()->getPosition().x > cover.particle()->getPosition().x &&
+				asteroids[i].particle()->getPosition().x < cover.particle()->getPosition().x + 200 &&
+				asteroids[i].particle()->getVelocity().y > 0)
+			{
+				if(asteroids[i].particle()->getPosition().y >= cover.particle()->getPosition().y )
+				{
+					switchYDirAsteroids(i);
+				}
+			}
+		}
+	}
+
+	if(spaceShip.particle()->getPosition().x + 130 >= pGraphicsModule->viewport.right &&
+		spaceShip.particle()->getAcceleration().x > 0 &&
+		spaceShip.particle()->getForce().x > 0 &&
+		spaceShip.particle()->getVelocity().x > 0)
+	{
+		switchXDirSpaceShip();
+	}
+
+	if(spaceShip.particle()->getPosition().x  <= pGraphicsModule->viewport.left &&
+		spaceShip.particle()->getAcceleration().x < 0 &&
+		spaceShip.particle()->getForce().x < 0 &&
+		spaceShip.particle()->getVelocity().x < 0)
+	{
+		switchXDirSpaceShip();
+	}
+	if((player.particle()->getPosition().x + 100 > pGraphicsModule->viewport.right && player.particle()->getVelocity().x > 0) ||
+		(player.particle()->getPosition().x  < pGraphicsModule->viewport.left && player.particle()->getVelocity().x < 0))
+	{
+		player.particle()->setVelocity(player.particle()->getVelocity().x * -1,player.particle()->getVelocity().y);
+		player.particle()->setAcceleration(player.particle()->getAcceleration().x * -1,player.particle()->getAcceleration().y);
+		player.particle()->setForce(player.particle()->getForce().x * -1,player.particle()->getForce().y);
+		player.particle()->setVelocity(0.0F,0.0F);
+	}
+
+	return 1;
+	
+!!!141058.cpp!!!	draw(inout pGraphicsModule : GraphicsM) : int
+
+	/* TO DO: add relevant code */
+
+    /* Display world */
+
+	for (int i = 0; i < astNums; i++)
+	{
+		asteroids[i].draw(pGraphicsModule);
+		explosions[i].draw(pGraphicsModule);
+	}
+	for (int i = 0; i < dinoNums; i++)
+	{
+		dinos[i].draw(pGraphicsModule);
+	}
+
+	spaceShip.draw(pGraphicsModule);
+	hill.draw(pGraphicsModule);
+	cover.draw(pGraphicsModule);
+	flys.draw(pGraphicsModule);
+	player.draw(pGraphicsModule);
+
+
+	return 1;
+!!!141186.cpp!!!	restAsteroid(in i : int) : void
+	
+	asteroids[i].particle()->setMass((float)rnd.getInt(100));
+	asteroids[i].particle()->setVelocity(0.0F,0.0F);
+	asteroids[i].particle()->setAcceleration(0.0F,0.0F);
+	if(rnd.getInt(2) == 1)
+	{
+		asteroids[i].particle()->setForce((float)rnd.getInt(100) *-1,(float)rnd.getInt(100));
+	}
+	else
+	{
+		asteroids[i].particle()->setForce((float)rnd.getInt(100)  ,(float)rnd.getInt(100));
+	}
+	asteroids[i].particle()->setPosition(spaceShip.particle()->getPosition().x + 60 ,spaceShip.particle()->getPosition().y + 35);
+
+!!!141442.cpp!!!	switchXDirSpaceShip() : void
+
+	spaceShip.particle()->setVelocity(spaceShip.particle()->getVelocity().x * -1,spaceShip.particle()->getVelocity().y);
+	spaceShip.particle()->setAcceleration(spaceShip.particle()->getAcceleration().x * -1,spaceShip.particle()->getAcceleration().y);
+	spaceShip.particle()->setForce(spaceShip.particle()->getForce().x * -1,spaceShip.particle()->getForce().y);
+	spaceShip.particle()->setVelocity(0.0F,0.0F);
+!!!141570.cpp!!!	switchYDirAsteroids(in i : int) : void
+
+	asteroids[i].particle()->setVelocity(asteroids[i].particle()->getVelocity().x,asteroids[i].particle()->getVelocity().y * -1);
+	asteroids[i].particle()->setAcceleration(asteroids[i].particle()->getAcceleration().x,asteroids[i].particle()->getAcceleration().y * -1);
+	asteroids[i].particle()->setForce(asteroids[i].particle()->getForce().x,asteroids[i].particle()->getForce().y * -1);
+!!!141954.cpp!!!	magnitude(in x : float, in y : float) : float
+
+	return sqrtf(x * x + y * y);
+!!!142082.cpp!!!	nonAxisAlignedCollision(in a : Point2D, in b : Point2D) : Point2D
+
+	Point2D temp0,temp1,temp2, length, reflection;
+	float projection;
+
+	temp0 = normalizeVector(a);
+
+	temp1 = scalarMultiply(-1,b);
+
+	projection = dotProduct(temp1,temp0);
+
+	length =  scalarMultiply(projection,temp0);
+
+	reflection = scalarMultiply(2, length);
+
+	temp2 = sumVectors(scalarMultiply(-1,reflection),temp1);
+
+	return temp2;
+!!!142210.cpp!!!	normalizeVector(in a : Point2D) : Point2D
+
+	Point2D temp;
+	float mag;
+	mag = magnitude(a.x,a.y);
+	temp.x = a.x / mag;
+	temp.y = a.y / mag;
+	return temp;
+!!!142338.cpp!!!	scalarMultiply(in scale : float, in a : Point2D) : Point2D
+
+	Point2D temp;
+	temp.x = a.x * scale;
+	temp.y = a.y * scale;
+	return temp;
+!!!142466.cpp!!!	dotProduct(in a : Point2D, in b : Point2D) : float
+
+	return a.x * b.x + a.y * b.y; 
+!!!142594.cpp!!!	sumVectors(in a : Point2D, in b : Point2D) : Point2D
+
+	Point2D temp;
+	temp.x = a.x + b.x;
+	temp.y = a.y + b.y;
+	return temp;
+!!!142722.cpp!!!	slopeBetweenPoints(in p1 : Point2D, in p2 : Point2D) : float
+
+	return (p2.x - p1.x)/(p2.y - p1.y);
+!!!142850.cpp!!!	perpSlope(in slope : float) : float
+
+	return -1/slope;
+!!!142978.cpp!!!	arePerp(in slope1 : float, in slope2 : float) : bool
+
+	if(slope1 * slope2 == -1)
+	{
+		return true;
+	}
+	return false;
+!!!143106.cpp!!!	lineIntersect(in L1Point : Point2D, in L1Slope : float, in L2Point : Point2D, in L2Slope : float) : Point2D
+
+	Point2D temp; 
+	
+	temp.x = (L1Slope * L1Point.x - L2Slope * L2Point.x + L2Point.y  - L1Point.y)/(L1Slope - L2Slope);
+
+	temp.y = L1Slope * (temp.x - L1Point.x) + L1Point.y;
+
+	return temp;

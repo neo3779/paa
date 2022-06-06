@@ -1,0 +1,36 @@
+class Input
+!!!132226.cpp!!!	Input()
+
+    /* TO DO: add relevant code */
+
+!!!132354.cpp!!!	~Input()
+
+	/* TO DO: add relevant code */
+
+	return;			
+!!!132482.cpp!!!	checkUserInput(in hWnd : HWND) : keyEvent
+
+	keyEvent		event;
+   
+
+   /* Terminate if user has pressed the Esc key */
+
+	if ( IS_KEY_DOWN(VK_ESCAPE) )
+		{
+		event = QUIT;
+
+		// Request window destruction if user has pressed the Esc key 
+		PostMessage(hWnd, WM_DESTROY, 0, 0);
+		}
+	else if ( IS_KEY_DOWN(VK_UP) )
+		event = UP;
+	else if ( IS_KEY_DOWN(VK_DOWN) )
+		event = DOWN;
+	else if ( IS_KEY_DOWN(VK_LEFT) )
+		event = LEFT;
+	else if ( IS_KEY_DOWN(VK_RIGHT) )
+		event = RIGHT;
+	else 
+		event = QUIET;
+
+	return event;

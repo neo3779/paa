@@ -1,0 +1,121 @@
+class ParticleModel
+!!!132610.cpp!!!	ParticleModel()
+
+	particleModelInit();
+!!!132738.cpp!!!	~ParticleModel()
+
+	/* TO DO: add relevant code */
+
+	particleModelCleanUp();
+
+	return;			
+!!!132866.cpp!!!	particleModelInit() : int
+
+	pos.x = 0.0F; pos.y = 0.0F;
+	vel.x = 0.0F; vel.y = 0.0F;
+	acc.x = 0.0F; acc.y = 0.0F + gravity;
+	foc.x = 0.0F; foc.y = 0.0F;
+	initVel.x = 0.0F; initVel.y = 0.0F;
+	angle = 0.0F;
+	mas = 0.0F;
+	apg = true;
+	return 1;
+!!!132994.cpp!!!	particleModelCleanUp() : void
+
+	/* TO DO: add relevant code */
+
+	return;			
+!!!133122.cpp!!!	setPosition(in xPos : float, in yPos : float) : void
+
+     // position of particle
+    pos.x = xPos; pos.y = yPos;
+!!!133250.cpp!!!	setVelocity(in xVel : float, in yVel : float) : void
+
+     // position of particle
+    vel.x = xVel; vel.y = yVel;
+!!!133378.cpp!!!	setInitVelocity(in xVel : float, in yVel : float) : void
+
+     // position of particle
+    vel.x = xVel; vel.y = yVel;
+!!!133506.cpp!!!	setAcceleration(in xAcc : float, in yAcc : float) : void
+
+     // position of particle
+    acc.x = xAcc; acc.y = yAcc + gravity;
+!!!133634.cpp!!!	setForce(in xFoc : float, in yFoc : float) : void
+
+     // position of particle
+    foc.x = xFoc; foc.y = yFoc;
+!!!133762.cpp!!!	setAngle(in a : float) : void
+
+	// apply gravity
+	angle = a;
+!!!133890.cpp!!!	setMass(in m : float) : void
+
+     // position of particle
+	mas = m;
+!!!134018.cpp!!!	setApg(in vApg : bool) : void
+
+	// apply gravity
+	apg = vApg;
+!!!134146.cpp!!!	getPosition() : Point2D
+
+	return pos;
+!!!134274.cpp!!!	getVelocity() : Point2D
+
+	return vel;
+!!!134402.cpp!!!	getInitVelocity() : Point2D
+
+	return initVel;
+!!!134530.cpp!!!	getAcceleration() : Point2D
+
+	return acc;
+!!!134658.cpp!!!	getForce() : Point2D
+
+	return foc;
+!!!134786.cpp!!!	getAngle() : float
+
+	return angle;
+!!!134914.cpp!!!	getApg() : bool
+
+	return apg;
+!!!135042.cpp!!!	getMass() : float
+
+	return mas;
+!!!135170.cpp!!!	projectileMotion() : int
+
+
+	vel.x += initVel.x * (cos(angle));
+
+	vel.y += initVel.y * (sin(angle));
+
+	return 1;
+!!!135298.cpp!!!	move(in timeStep : float) : int
+
+	float halfTsquard = 0;
+	
+	halfTsquard = timeStep * timeStep / 2;
+
+	//X
+
+	acc.x = foc.x/mas;
+
+	pos.x += vel.x * timeStep + acc.x * halfTsquard;
+	
+	vel.x += acc.x * timeStep;
+
+
+	//Y
+	
+	acc.y = foc.y/mas;
+	
+	if(apg)
+	{
+		acc.y = acc.y + gravity;
+	}
+
+	pos.y += vel.y * timeStep + acc.y * halfTsquard;
+	
+	vel.y += acc.y * timeStep;
+	
+	
+	return 1;

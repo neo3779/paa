@@ -1,0 +1,32 @@
+class Random
+!!!137346.cpp!!!	Random()
+
+	/* TO DO: add relevant code */
+!!!137474.cpp!!!	~Random()
+
+	/* TO DO: add relevant code */
+
+	randomCleanUp();
+	
+!!!137602.cpp!!!	randomInit() : int
+
+	return 1;
+!!!137730.cpp!!!	randomCleanUp() : void
+
+	return;
+!!!137858.cpp!!!	getInt(in max : float) : int
+
+    return float(max*rand()/(RAND_MAX+1.0));
+!!!137986.cpp!!!	getFloat() : float
+
+	return rand()/(float(RAND_MAX)+1); 
+!!!138114.cpp!!!	getIntBetween(in min : int, in max : int) : int
+
+    if (min>max)
+    {
+        return max+int((min-max+1)*rand()/(RAND_MAX+1.0));
+    }
+    else
+    {
+        return min+int((max-min+1)*rand()/(RAND_MAX+1.0));
+    }

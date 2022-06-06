@@ -1,0 +1,12 @@
+window_sizes 1276 774 122 1152 533 82
+diagrams
+  active  classdiagram_ref 128002 // Main
+    988 649 80 4 332 0
+end
+show_stereotypes
+selected class_ref 129666 // SpaceShip
+open
+  classview_ref 128002 // PPAIE4GProC++_GDIR1
+  classview_ref 128130 // Main
+end
+end

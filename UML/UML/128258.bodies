@@ -1,0 +1,26 @@
+class Friction
+!!!128002.cpp!!!	Friction()
+
+	frictionInit();
+!!!128130.cpp!!!	~Friction()
+
+	/* TO DO: add relevant code */
+
+	frictionCleanUp();
+
+	return;			
+!!!128258.cpp!!!	frictionInit() : int
+
+	fric = 0.0F;
+	return 1;
+!!!128386.cpp!!!	frictionCleanUp() : void
+
+	/* TO DO: add relevant code */
+
+	return;			
+!!!128514.cpp!!!	setFriction(in f : float) : void
+
+	fric = f;
+!!!128642.cpp!!!	getFriction() : float
+
+	return fric;
